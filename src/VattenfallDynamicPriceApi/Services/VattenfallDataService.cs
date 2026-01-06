@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using VattenfallDynamicPriceApi.Extensions;
 using VattenfallDynamicPriceApi.Models.Evcc;
 using VattenfallDynamicPriceApi.Models.Vattenfall;
 
@@ -49,8 +50,8 @@ public partial class VattenfallDataService
 		
 		EvccData = electricityData.TariffData.Select(td => new EvccApiHourlyData
 			{
-				Start = td.StartTime,
-				End = td.EndTime,
+				Start = td.StartTime.ToUtcKeepTimeAsIs(),
+				End = td.EndTime.ToUtcKeepTimeAsIs(),
 				Value = td.AmountInclVat
 			})
 			.OrderBy(td => td.Start)
