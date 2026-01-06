@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VattenfallDynamicPriceApi", "VattenfallDynamicPriceApi\VattenfallDynamicPriceApi.csproj", "{27AF41DB-FA7D-4FC8-8F61-FD0F24D2B2CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D4147FC-C846-4B7E-9AFB-2611FB381821}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27AF41DB-FA7D-4FC8-8F61-FD0F24D2B2CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27AF41DB-FA7D-4FC8-8F61-FD0F24D2B2CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27AF41DB-FA7D-4FC8-8F61-FD0F24D2B2CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27AF41DB-FA7D-4FC8-8F61-FD0F24D2B2CE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
