@@ -4,8 +4,7 @@ services:
     container_name: vattenfalldynamicpriceapi
     image: vattenfalldynamicpriceapi
     build:
-      context: .
-      dockerfile: VattenfallDynamicPriceApi/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - 8080:8080
     environment:

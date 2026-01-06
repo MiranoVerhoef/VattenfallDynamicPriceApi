@@ -8,17 +8,18 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        clang zlib1g-dev
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["VattenfallDynamicPriceApi/VattenfallDynamicPriceApi.csproj", "VattenfallDynamicPriceApi/"]
-RUN dotnet restore "VattenfallDynamicPriceApi/VattenfallDynamicPriceApi.csproj"
-COPY . .
+
 WORKDIR "/src/VattenfallDynamicPriceApi"
-RUN dotnet build "./VattenfallDynamicPriceApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+COPY ["src/VattenfallDynamicPriceApi/VattenfallDynamicPriceApi.csproj", "/src/VattenfallDynamicPriceApi/"]
+RUN dotnet restore "VattenfallDynamicPriceApi.csproj"
+
+COPY ["src/VattenfallDynamicPriceApi/", "/src/VattenfallDynamicPriceApi/"]
+RUN dotnet build "VattenfallDynamicPriceApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-WORKDIR "/src/VattenfallDynamicPriceApi"
-RUN dotnet publish "./VattenfallDynamicPriceApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "VattenfallDynamicPriceApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-bookworm-slim
 WORKDIR /app
