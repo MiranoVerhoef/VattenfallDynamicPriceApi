@@ -52,7 +52,7 @@ public partial class VattenfallDataService
 			{
 				Start = td.StartTime.ToUtcKeepTimeAsIs(),
 				End = td.EndTime.ToUtcKeepTimeAsIs(),
-				Value = td.AmountInclVat
+				Value = td.AmountInclVat * 100 // Values are in cents
 			})
 			.OrderBy(td => td.Start)
 			.ToArray();
