@@ -6,10 +6,12 @@ Seeing as of the time of writing, there is no official API to get hourly prices 
 
 ## Endpoints
 
-| URL      | Description                                                                                          |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| /v1/data | Provides parsed data from Vattenfall                                                                 |
-| /v1/evcc | Provides data compatible with [EVCC](https://docs.evcc.io/en/docs/tariffs#dynamic-electricity-price) |
+| URL                 | Description                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| /v1/data            | Provides parsed data from Vattenfall                                                                 |
+| /v1/evcc            | Provides data compatible with [EVCC](https://docs.evcc.io/en/docs/tariffs#dynamic-electricity-price) |
+| /v1/now/electricity | Provides the current price for electricity                                                           |
+| /v1/now/gas         | Provides the current price for gas                                                                   |
 
 ## Environment variables
 

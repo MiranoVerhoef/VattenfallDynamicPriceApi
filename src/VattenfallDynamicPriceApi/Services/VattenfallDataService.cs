@@ -12,6 +12,7 @@ public partial class VattenfallDataService
 	private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
 	public FlexTariffData[]? Data { get; private set; } = [];
+	
 	public EvccApiHourlyData[]? EvccData { get; private set; } = [];
 
 	public async Task InitializeAsync()
@@ -21,6 +22,32 @@ public partial class VattenfallDataService
 		await UpdateDataAsync();
 		_ = new Timer(RefreshTimerElapsed, null, CacheDuration, CacheDuration);
 	}
+
+	private decimal GetCurrentTariffForProductType(string productType, string description)
+	{
+		var productData = Data?.FirstOrDefault(d => d.Product == productType);
+		if (productData == null)
+		{
+			Console.WriteLine($"Could not get current {description} tariff, no data");
+			return 999;
+		}
+
+		var now = DateTime.Now;
+		var currentTariff = productData.TariffData.FirstOrDefault(d => d.StartTime <= now && d.EndTime >= now);
+		if (currentTariff != null)
+			return currentTariff.AmountInclVat;
+
+		var highestTariff = productData.TariffData.Max(t => t.AmountInclVat);
+		Console.WriteLine($"Could not get current {description} tariff, no value found for current time, returning highest value:" + highestTariff);
+
+		return highestTariff;
+	}
+
+	public decimal GetCurrentElectricityTariff()
+		=> GetCurrentTariffForProductType("E", "electricity");
+	
+	public decimal GetCurrentGasTariff()
+		=> GetCurrentTariffForProductType("G", "gas");
 
 	private void RefreshTimerElapsed(object? _)
 	{
