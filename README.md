@@ -4,7 +4,7 @@
 
 Seeing as of the time of writing, there is no official API to get hourly prices from Vattenfall, I have made this application to scrape them off of the following page: https://www.vattenfall.nl/klantenservice/alles-over-je-dynamische-contract/
 
-## Simple WEBUI avaiable on port 8080
+## Simple WEBUI available on port 8080
 
 ## Endpoints
 
