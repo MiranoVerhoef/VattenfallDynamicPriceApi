@@ -2,6 +2,8 @@
 
 **THIS PROJECT IS NOT CREATED, AFFILITED, ENDORSED OR SPONSORED BY VATTENFALL**
 
+https://github.com/miranoverhoef/VattenfallDynamicPriceApi/pkgs/container/vattenfalldynamicpriceapi
+
 Seeing as of the time of writing, there is no official API to get hourly prices from Vattenfall, I have made this application to scrape them off of the following page: https://www.vattenfall.nl/klantenservice/alles-over-je-dynamische-contract/
 
 ## Simple WEBUI available on port 8080
