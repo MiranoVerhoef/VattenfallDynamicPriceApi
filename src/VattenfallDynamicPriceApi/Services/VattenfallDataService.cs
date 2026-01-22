@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Serilog;
 using VattenfallDynamicPriceApi.Extensions;
 using VattenfallDynamicPriceApi.Models.Evcc;
@@ -17,13 +18,14 @@ public partial class VattenfallDataService : IDisposable, IAsyncDisposable
 	
 	private TimeSpan _cacheDuration = TimeSpan.FromSeconds(60);
 	private Timer? _timer;
+	private readonly SemaphoreSlim _updateLock = new(1, 1);
 
 	public async Task InitializeAsync()
 	{
 		_cacheDuration = TimeSpan.FromSeconds(Math.Max(60, SettingsProvider.Instance.Settings.RefreshIntervalSeconds));
 		Log.Information("Refresh interval: {Interval}", _cacheDuration);
 		
-		await UpdateDataAsync();
+		await UpdateDataAsyncSafe();
 		_timer = new Timer(RefreshTimerElapsed, null, _cacheDuration, _cacheDuration);
 	}
 
@@ -55,19 +57,32 @@ public partial class VattenfallDataService : IDisposable, IAsyncDisposable
 
 	private void RefreshTimerElapsed(object? _)
 	{
+		// Fire-and-forget; UpdateDataAsyncSafe handles locking + error logging.
+		_ = UpdateDataAsyncSafe();
+	}
+
+	private async Task UpdateDataAsyncSafe()
+	{
+		if (!await _updateLock.WaitAsync(0))
+			return; // Skip if an update is already running.
+
 		try
 		{
 			Log.Information("Updating data");
-			Task.Run(UpdateDataAsync).Wait();
+			await UpdateDataAsync();
 			Log.Information("Updated data");
 		}
 		catch (Exception e)
 		{
 			Log.Error(e, "Failed to update data");
 		}
+		finally
+		{
+			_updateLock.Release();
+		}
 	}
 
-	private async Task UpdateDataAsync()
+private async Task UpdateDataAsync()
 	{
 		var (apiBaseUrl, apiKey) = await TryGetApiUrlAndKeyAsync();
 		Data = await GetFlexTariffDataAsync(apiBaseUrl, apiKey);
@@ -91,7 +106,15 @@ public partial class VattenfallDataService : IDisposable, IAsyncDisposable
 
 	private static async Task<FlexTariffData[]> GetFlexTariffDataAsync(string apiBaseUrl, string apiKey)
 	{
-		var apiEndpoint = apiBaseUrl + "/DynamicTariff";
+		if (string.IsNullOrWhiteSpace(apiBaseUrl))
+			throw new Exception("API base URL is empty. Provide VFAPI_KnownApiBaseUrl/VFAPI_KnownApiKey or allow dynamic scraping.");
+		if (string.IsNullOrWhiteSpace(apiKey))
+			throw new Exception("API key is empty. Provide VFAPI_KnownApiBaseUrl/VFAPI_KnownApiKey or allow dynamic scraping.");
+
+		if (!Uri.TryCreate(apiBaseUrl.TrimEnd('/') + "/", UriKind.Absolute, out var baseUri))
+			throw new Exception($"API base URL is not a valid absolute URL: '{apiBaseUrl}'");
+
+		var apiEndpoint = new Uri(baseUri, "DynamicTariff");
 		var apiRequest = new HttpRequestMessage(HttpMethod.Get, apiEndpoint);
 		apiRequest.Headers.Add("ocp-apim-subscription-key", apiKey);
 
@@ -106,7 +129,13 @@ public partial class VattenfallDataService : IDisposable, IAsyncDisposable
 	private static async Task<(string apiBaseUrl, string apiKey)> TryGetApiUrlAndKeyAsync()
 	{
 		if (SettingsProvider.Instance.Settings.UseKnownValues)
-			return (SettingsProvider.Instance.Settings.KnownApiBaseUrl, SettingsProvider.Instance.Settings.KnownApiKey);
+		{
+			var knownBaseUrl = SettingsProvider.Instance.Settings.KnownApiBaseUrl;
+			var knownKey = SettingsProvider.Instance.Settings.KnownApiKey;
+			if (string.IsNullOrWhiteSpace(knownBaseUrl) || string.IsNullOrWhiteSpace(knownKey))
+				Log.Warning("UseKnownValues is enabled but KnownApiBaseUrl/KnownApiKey are empty");
+			return (knownBaseUrl, knownKey);
+		}
 
 		try
 		{
